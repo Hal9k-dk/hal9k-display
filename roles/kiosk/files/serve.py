@@ -122,7 +122,7 @@ def index():
     <!DOCTYPE HTML>
     <head>
     <link href=" https://cdn.jsdelivr.net/npm/@picocss/pico@1.5.7/css/pico.min.css " rel="stylesheet">
-<style>img {{ width: 120px; }}</style>
+<style>img {{ max-width: 200px; height: auto; }}</style>
 </head>
 <body>
   <main class="container">
