@@ -1,13 +1,26 @@
 from bottle import run, route, response
 import os
+import glob
 from subprocess import check_output as callx
 import json
 import requests
 import xml.etree.ElementTree as ET
 
+def _ensure_sway_env():
+    """Auto-detect SWAYSOCK and WAYLAND_DISPLAY if not already set."""
+    if 'SWAYSOCK' not in os.environ:
+        runtime = os.environ.get('XDG_RUNTIME_DIR', f'/run/user/{os.getuid()}')
+        sockets = glob.glob(f'{runtime}/sway-ipc.*.sock')
+        if sockets:
+            os.environ['SWAYSOCK'] = sorted(sockets)[-1]
+    if 'WAYLAND_DISPLAY' not in os.environ:
+        os.environ['WAYLAND_DISPLAY'] = 'wayland-1'
+
+_ensure_sway_env()
+
 def call(args):
     print(" ".join(args))
-    return callx(args)
+    return callx(args, env=os.environ)
 
 @route('/vejr')
 def vejr():
