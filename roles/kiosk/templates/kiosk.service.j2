@@ -1,3 +1,7 @@
+[Unit]
+After=serve.service
+Requires=serve.service
+
 [Service]
 Type=simple
 RemainAfterExit=yes

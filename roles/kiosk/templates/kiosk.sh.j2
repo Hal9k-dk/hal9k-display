@@ -10,6 +10,17 @@ urls=(
 )
 
 {% raw %}
+# wait for local HTTP server if any kiosk URL depends on it
+if printf '%s\n' "${urls[@]}" | grep -q 'localhost:8080'; then
+    echo "Waiting for localhost:8080..."
+    for i in $(seq 1 60); do
+        if curl -s -o /dev/null http://localhost:8080/; then
+            break
+        fi
+        sleep 0.5
+    done
+fi
+
 swaytree() {
     swaymsg -t get_tree | jq "$@"
 }
@@ -40,7 +51,7 @@ for number in $numbers; do
     ids=($(get_window_ids "$workspace"))
     case "${#ids[@]}" in
         0)
-	    url="${urls[number-1]}"
+	    url="${urls[number]}"
             swaymsg "workspace $workspace"
             swaymsg "exec $browsercmd \"$url\""
 	    sleep 15
