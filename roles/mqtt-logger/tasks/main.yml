@@ -1,0 +1,36 @@
+---
+- name: Create mqtt-logger directories
+  file:
+    path: "/home/{{ kiosk_user }}/mqtt-logger/logs"
+    state: directory
+    owner: "{{ kiosk_user }}"
+    group: "{{ kiosk_user }}"
+    mode: '0755'
+
+- name: Deploy influx-env secrets file
+  template:
+    src: influx-env.j2
+    dest: "/home/{{ kiosk_user }}/influx-env"
+    owner: "{{ kiosk_user }}"
+    group: "{{ kiosk_user }}"
+    mode: '0600'
+
+- name: Deploy mqtt-logger systemd user unit
+  template:
+    src: mqtt-logger.service.j2
+    dest: "/home/{{ kiosk_user }}/.config/systemd/user/mqtt-logger.service"
+    owner: "{{ kiosk_user }}"
+    group: "{{ kiosk_user }}"
+    mode: '0644'
+
+- name: Enable mqtt-logger.service for default.target
+  file:
+    src: "/home/{{ kiosk_user }}/.config/systemd/user/mqtt-logger.service"
+    dest: "/home/{{ kiosk_user }}/.config/systemd/user/default.target.wants/mqtt-logger.service"
+    owner: "{{ kiosk_user }}"
+    group: "{{ kiosk_user }}"
+    state: link
+
+# NOTE: The mqtt-logger Python package and its venv must be installed separately.
+# Clone/install the mqtt-logger project into ~/mqtt-logger and create the .venv.
+# This role only deploys the configuration and systemd service.

@@ -1,0 +1,85 @@
+---
+- name: Create user directories
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ kiosk_user }}"
+    group: "{{ kiosk_user }}"
+    mode: '0755'
+  loop:
+    - "/home/{{ kiosk_user }}/clock"
+    - "/home/{{ kiosk_user }}/.config/systemd/user"
+    - "/home/{{ kiosk_user }}/.config/systemd/user/default.target.wants"
+    - "/home/{{ kiosk_user }}/.config/systemd/user/graphical-session.target.wants"
+
+- name: Deploy kiosk.sh
+  template:
+    src: kiosk.sh.j2
+    dest: "/home/{{ kiosk_user }}/kiosk.sh"
+    owner: "{{ kiosk_user }}"
+    group: "{{ kiosk_user }}"
+    mode: '0755'
+
+- name: Deploy serve.py
+  copy:
+    src: serve.py
+    dest: "/home/{{ kiosk_user }}/serve.py"
+    owner: "{{ kiosk_user }}"
+    group: "{{ kiosk_user }}"
+    mode: '0644'
+
+- name: Deploy clock page and font
+  copy:
+    src: "clock/{{ item }}"
+    dest: "/home/{{ kiosk_user }}/clock/{{ item }}"
+    owner: "{{ kiosk_user }}"
+    group: "{{ kiosk_user }}"
+    mode: '0644'
+  loop:
+    - index.html
+    - GortonDigitalLight.otf
+
+- name: Deploy systemd user units
+  template:
+    src: "{{ item }}.j2"
+    dest: "/home/{{ kiosk_user }}/.config/systemd/user/{{ item }}"
+    owner: "{{ kiosk_user }}"
+    group: "{{ kiosk_user }}"
+    mode: '0644'
+  loop:
+    - kiosk.service
+    - serve.service
+    - ydotool.service
+
+- name: Enable kiosk.service for graphical-session.target
+  file:
+    src: "/home/{{ kiosk_user }}/.config/systemd/user/kiosk.service"
+    dest: "/home/{{ kiosk_user }}/.config/systemd/user/graphical-session.target.wants/kiosk.service"
+    owner: "{{ kiosk_user }}"
+    group: "{{ kiosk_user }}"
+    state: link
+
+- name: Enable serve.service for graphical-session.target
+  file:
+    src: "/home/{{ kiosk_user }}/.config/systemd/user/serve.service"
+    dest: "/home/{{ kiosk_user }}/.config/systemd/user/graphical-session.target.wants/serve.service"
+    owner: "{{ kiosk_user }}"
+    group: "{{ kiosk_user }}"
+    state: link
+
+- name: Enable ydotool.service for default.target
+  file:
+    src: "/home/{{ kiosk_user }}/.config/systemd/user/ydotool.service"
+    dest: "/home/{{ kiosk_user }}/.config/systemd/user/default.target.wants/ydotool.service"
+    owner: "{{ kiosk_user }}"
+    group: "{{ kiosk_user }}"
+    state: link
+
+- name: Reload user systemd daemon
+  systemd:
+    daemon_reload: true
+    scope: user
+  become: true
+  become_user: "{{ kiosk_user }}"
+  environment:
+    XDG_RUNTIME_DIR: "/run/user/{{ kiosk_user_uid | default(1000) }}"

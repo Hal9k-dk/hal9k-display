@@ -1,0 +1,9 @@
+---
+kiosk_user: hal9k
+# MQTT broker to subscribe to
+mqtt_logger_host: imqtt.hal9k.dk
+# InfluxDB credentials (override in vault or inventory)
+influxdb_url: https://influxdb.belunktum.dk/
+influxdb_bucket: ai-machine
+influxdb_token: ""
+influxdb_org: belunktum.dk

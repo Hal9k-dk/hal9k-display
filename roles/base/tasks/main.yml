@@ -1,0 +1,92 @@
+---
+- name: Install base packages
+  pacman:
+    update_cache: true
+    name:
+      - sway
+      - firefox
+      - foot
+      - wmenu
+      - grim
+      - slurp
+      - jq
+      - python
+      - python-bottle
+      - python-requests
+      - python-packaging
+      - mosquitto
+      - ydotool
+    state: present
+
+- name: Create kiosk user
+  user:
+    name: "{{ kiosk_user }}"
+    uid: "{{ kiosk_user_uid }}"
+    shell: /usr/bin/bash
+    create_home: true
+    state: present
+
+- name: Enable linger for kiosk user
+  command: loginctl enable-linger {{ kiosk_user }}
+  args:
+    creates: /var/lib/systemd/linger/{{ kiosk_user }}
+
+- name: Create getty autologin drop-in directory
+  file:
+    path: /etc/systemd/system/getty@tty1.service.d
+    state: directory
+    mode: '0755'
+
+- name: Configure autologin on tty1
+  copy:
+    dest: /etc/systemd/system/getty@tty1.service.d/autologin.conf
+    content: |
+      [Service]
+      ExecStart=
+      ExecStart=-/sbin/agetty -o '-p -f -- \\u' --noclear --autologin {{ kiosk_user }} %I $TERM
+  notify: Reload systemd
+
+- name: Deploy bash_profile
+  copy:
+    dest: "/home/{{ kiosk_user }}/.bash_profile"
+    owner: "{{ kiosk_user }}"
+    group: "{{ kiosk_user }}"
+    mode: '0644'
+    content: |
+      #
+      # ~/.bash_profile
+      #
+
+      [[ -f ~/.bashrc ]] && . ~/.bashrc
+
+- name: Deploy bashrc with sway auto-launch
+  copy:
+    dest: "/home/{{ kiosk_user }}/.bashrc"
+    owner: "{{ kiosk_user }}"
+    group: "{{ kiosk_user }}"
+    mode: '0644'
+    content: |
+      #
+      # ~/.bashrc
+      #
+
+      # If not running interactively, don't do anything
+      [[ $- != *i* ]] && return
+
+      alias ls='ls --color=auto'
+      alias grep='grep --color=auto'
+      PS1='[\u@\h \W]\$ '
+
+      [[ "$(tty)" != /dev/tty1 ]] || exec systemd-cat -t sway sway --verbose --debug
+
+- name: Deploy .profile (prevents non-sway login)
+  copy:
+    dest: "/home/{{ kiosk_user }}/.profile"
+    owner: "{{ kiosk_user }}"
+    group: "{{ kiosk_user }}"
+    mode: '0644'
+    content: |
+      exit 1
+
+- name: Flush handlers
+  meta: flush_handlers

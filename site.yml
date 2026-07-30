@@ -2,4 +2,8 @@
 - name: Deploy hal9k display host
   hosts: display
   roles:
+    - base
+    - sway
+    - kiosk
+    - mqtt-logger
     - heartbeat

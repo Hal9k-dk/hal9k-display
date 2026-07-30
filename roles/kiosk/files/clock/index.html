@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Big Clock</title>
+    <style>
+        @font-face {
+            font-family: 'Gorton Digital Light';
+            src: url('GortonDigitalLight.otf') format('opentype');
+            font-weight: normal;
+            font-style: normal;
+        }
+
+        body {
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #111;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100vw;
+        }
+
+        .clock {
+            font-family: 'Gorton Digital Light', monospace, sans-serif;
+            font-size: 12vw;
+            color: #fff;
+            letter-spacing: 0.05em;
+            text-shadow: 0 0 30px #00f, 0 0 10px #fff;
+            user-select: none;
+            font-variant-numeric: tabular-nums;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .digit {
+            display: inline-block;
+            width: 0.8em;
+            text-align: center;
+        }
+
+        .colon {
+            display: inline-block;
+            width: 0.3em;
+            text-align: center;
+        }
+
+        .date {
+            font-family: 'Gorton Digital Light', monospace, sans-serif;
+            font-size: 3vw;
+            color: #fff;
+            margin-top: 2vw;
+            text-align: center;
+            text-shadow: 0 0 10px #00f, 0 0 5px #fff;
+            user-select: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="clock" id="clock">
+            <span class="digit" id="h1"></span><span class="digit" id="h2"></span>
+            <span class="colon">:</span>
+            <span class="digit" id="m1"></span><span class="digit" id="m2"></span>
+            <span class="colon">:</span>
+            <span class="digit" id="s1"></span><span class="digit" id="s2"></span>
+        </div>
+        <div class="date" id="date"></div>
+        <div class="date" id="reminder"></div>
+    </div>
+    <script>
+        function updateClock() {
+            const now = new Date();
+            const h = String(now.getHours()).padStart(2, '0');
+            const m = String(now.getMinutes()).padStart(2, '0');
+            const s = String(now.getSeconds()).padStart(2, '0');
+            document.getElementById('h1').textContent = h[0];
+            document.getElementById('h2').textContent = h[1];
+            document.getElementById('m1').textContent = m[0];
+            document.getElementById('m2').textContent = m[1];
+            document.getElementById('s1').textContent = s[0];
+            document.getElementById('s2').textContent = s[1];
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('date').textContent = now.toLocaleDateString(undefined, options);
+
+            const reminderDate = new Date(2025, 8, 27, 9, 0);
+            let daysLeft = Math.ceil((reminderDate - now) / (1000 * 60 * 60 * 24));
+            let reminderText = "Arbejdsdag";
+            if (daysLeft > 7) {
+                let weeks = Math.floor(daysLeft / 7);
+                let days = daysLeft % 7;
+                reminderText += " om " + weeks + " uge" + (weeks > 1 ? "r" : "") + (days > 0 ? " og " + days + " dag" + (days > 1 ? "e" : "") : "");
+            } else if (daysLeft > 2) {
+                reminderText += " om " + daysLeft + " dage";
+            } else if (daysLeft === 2) {
+                reminderText += " i overmorgen!";
+            } else if (daysLeft === 1) {
+                reminderText += " i morgen!";
+            } else if (daysLeft === 0) {
+                reminderText += " i dag!";
+            } else if (daysleft < -2) {
+                reminderText = "Tak for indsatsen!";
+            } else {
+                reminderText = "";
+            }
+            console.log(reminderText);
+            document.getElementById('reminder').textContent = reminderText;
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+    </script>
+</body>
+
+</html>

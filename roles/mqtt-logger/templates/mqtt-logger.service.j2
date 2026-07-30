@@ -1,0 +1,15 @@
+[Unit]
+Description=MQTT Logger — subscribe to all topics and log to JSONL
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+EnvironmentFile=/home/{{ kiosk_user }}/influx-env
+ExecStart=/home/{{ kiosk_user }}/mqtt-logger/.venv/bin/mqtt-logger \
+    --host {{ mqtt_logger_host }} \
+    --log-dir /home/{{ kiosk_user }}/mqtt-logger/logs
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy=default.target

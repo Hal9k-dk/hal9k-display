@@ -1,0 +1,69 @@
+#!/bin/bash
+set -eu -o pipefail
+
+browsercmd="{{ kiosk_browser_cmd }}"
+
+urls=(
+{%- for url in kiosk_urls %}
+	"{{ url }}"
+{%- endfor %}
+)
+
+{% raw %}
+swaytree() {
+    swaymsg -t get_tree | jq "$@"
+}
+
+get_window_ids() {
+    local workspace="$1"
+    swaytree -r 'recurse(.nodes[])|select(.type=="workspace" and .name=="'$workspace'")|recurse(.nodes[])|select(.type=="con" and .app_id=="firefox" or .app_id=="chromium")|.id'
+}
+
+any_windows() {
+    ids=($(get_window_ids "$workspace"))
+    [[ ${#ids[@]} -gt 0 ]]
+}
+
+swaymsg() {
+	(set -x; /usr/bin/swaymsg "$@")
+}
+
+# find outputs
+outputs=($(swaymsg -t get_outputs | jq -r '.[]|.name'))
+screens=${#outputs[@]}
+numbers=$(seq 0 $((${#outputs[@]}-1)))
+workspaces=($(seq 1 $screens | sed 's/^/kiosk/'))
+
+# create workspaces
+for number in $numbers; do
+    workspace=${workspaces[number]}
+    ids=($(get_window_ids "$workspace"))
+    case "${#ids[@]}" in
+        0)
+	    url="${urls[number-1]}"
+            swaymsg "workspace $workspace"
+            swaymsg "exec $browsercmd \"$url\""
+	    sleep 15
+            while ! any_windows "$workspace"; do
+                sleep 0.5
+            done
+            ;;
+        1)
+            ;;
+        *)
+            for ((i = 1; i < ${#ids[@]}; i++)); do
+		echo "Kill ${ids[i]}"
+                swaymsg "[con_id=${ids[i]}] kill"
+            done
+            ;;
+    esac
+done
+
+# move workspaces
+for number in $numbers; do
+    workspace=${workspaces[number]}
+    output=${outputs[number]}
+    swaymsg '[workspace="'$workspace'"] move workspace to '$output
+    swaymsg '[workspace="'$workspace'"] focus'
+done
+{% endraw %}
