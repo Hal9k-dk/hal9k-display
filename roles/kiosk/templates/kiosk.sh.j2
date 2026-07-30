@@ -3,6 +3,16 @@ set -eu -o pipefail
 
 browsercmd="{{ kiosk_browser_cmd }}"
 
+# auto-detect sway socket if not in environment
+if [ -z "${SWAYSOCK:-}" ]; then
+    runtime="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"
+    for s in "$runtime"/sway-ipc.*.sock; do
+        export SWAYSOCK="$s"
+        break
+    done
+fi
+[ -n "${WAYLAND_DISPLAY:-}" ] || export WAYLAND_DISPLAY=wayland-1
+
 urls=(
 {%- for url in kiosk_urls %}
 	"{{ url }}"
