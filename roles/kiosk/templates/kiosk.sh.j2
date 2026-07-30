@@ -20,6 +20,30 @@ urls=(
 )
 
 {% raw %}
+KF="${XDG_CONFIG_HOME:-$HOME/.config}/firefox-kiosk"
+
+# ensure Firefox kiosk profile exists with session restore disabled
+if [ ! -f "$KF/user.js" ]; then
+    mkdir -p "$KF"
+    cat > "$KF/user.js" <<'PREFS'
+user_pref("browser.sessionstore.resume_from_crash", false);
+user_pref("browser.sessionstore.max_tabs_undo", 0);
+user_pref("browser.sessionstore.max_windows_undo", 0);
+user_pref("browser.sessionstore.restore_on_demand", false);
+user_pref("browser.sessionstore.restore_tabs_lazily", false);
+user_pref("browser.sessionstore.restore_pinned_tabs_on_demand", false);
+user_pref("browser.startup.page", 0);
+user_pref("browser.tabs.warnOnClose", false);
+user_pref("browser.tabs.warnOnCloseOtherTabs", false);
+user_pref("datareporting.policy.dataSubmissionPolicyBypassNotification", true);
+user_pref("app.shield.optoutstudies.enabled", false);
+user_pref("browser.shell.checkDefaultBrowser", false);
+user_pref("browser.rights.3.shown", true);
+PREFS
+fi
+
+browsercmd="$browsercmd --profile $KF"
+
 # wait for local HTTP server if any kiosk URL depends on it
 if printf '%s\n' "${urls[@]}" | grep -q 'localhost:8080'; then
     echo "Waiting for localhost:8080..."
@@ -37,7 +61,7 @@ swaytree() {
 
 get_window_ids() {
     local workspace="$1"
-    swaytree -r 'recurse(.nodes[])|select(.type=="workspace" and .name=="'$workspace'")|recurse(.nodes[])|select(.type=="con" and .app_id=="firefox" or .app_id=="chromium")|.id'
+    swaytree -r 'recurse(.nodes[])|select(.type=="workspace" and .name=="'$workspace'")|recurse(.nodes[])|select(.type=="con" and (.app_id=="firefox" or .app_id=="chromium"))|.id'
 }
 
 any_windows() {
@@ -61,12 +85,14 @@ for number in $numbers; do
     ids=($(get_window_ids "$workspace"))
     case "${#ids[@]}" in
         0)
-	    url="${urls[number]}"
+	    url="${urls[$((number % ${#urls[@]}))]}"
             swaymsg "workspace $workspace"
             swaymsg "exec $browsercmd \"$url\""
-	    sleep 15
-            while ! any_windows "$workspace"; do
+            # wait up to 10s for window to appear
+            waited=0
+            while ! any_windows "$workspace" && [ $waited -lt 20 ]; do
                 sleep 0.5
+                waited=$((waited + 1))
             done
             ;;
         1)

@@ -5,6 +5,8 @@ Requires=serve.service
 [Service]
 Type=simple
 RemainAfterExit=yes
+Restart=on-failure
+RestartSec=5
 ExecStart=/home/{{ kiosk_user }}/kiosk.sh
 
 [Install]
