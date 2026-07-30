@@ -1,0 +1,50 @@
+---
+- name: Install mosquitto
+  pacman:
+    name: mosquitto
+    state: present
+
+- name: Deploy heartbeat script
+  copy:
+    dest: /usr/local/bin/hal9k-heartbeat
+    mode: '0755'
+    content: |
+      #!/bin/sh
+      mosquitto_pub -h localhost -t hal9k/bridge/heartbeat -r -m "{\"timestamp\":\"$(date -Iseconds)\"}"
+
+- name: Deploy hal9k-heartbeat.service
+  copy:
+    dest: /etc/systemd/system/hal9k-heartbeat.service
+    content: |
+      [Unit]
+      Description=HAL9K bridge heartbeat publisher
+
+      [Service]
+      Type=oneshot
+      ExecStart=/usr/local/bin/hal9k-heartbeat
+  notify: Reload systemd
+
+- name: Deploy hal9k-heartbeat.timer
+  copy:
+    dest: /etc/systemd/system/hal9k-heartbeat.timer
+    content: |
+      [Unit]
+      Description=HAL9K bridge heartbeat timer
+
+      [Timer]
+      OnCalendar=minutely
+      Persistent=true
+
+      [Install]
+      WantedBy=timers.target
+  notify: Reload systemd
+
+- name: Flush handlers before enabling timer
+  meta: flush_handlers
+
+- name: Enable and start hal9k-heartbeat.timer
+  systemd:
+    name: hal9k-heartbeat.timer
+    enabled: true
+    state: started
+    daemon_reload: false

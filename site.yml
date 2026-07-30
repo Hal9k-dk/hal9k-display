@@ -1,0 +1,5 @@
+---
+- name: Deploy hal9k display host
+  hosts: display
+  roles:
+    - heartbeat
