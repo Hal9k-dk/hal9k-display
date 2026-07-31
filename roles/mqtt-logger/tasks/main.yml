@@ -7,6 +7,22 @@
     group: "{{ kiosk_user }}"
     mode: '0755'
 
+- name: Copy mqtt-logger source
+  copy:
+    src: mqtt_logger_src/
+    dest: "/home/{{ kiosk_user }}/mqtt-logger/"
+    owner: "{{ kiosk_user }}"
+    group: "{{ kiosk_user }}"
+    mode: preserve
+
+- name: Build virtualenv with uv
+  command:
+    cmd: uv sync
+    chdir: "/home/{{ kiosk_user }}/mqtt-logger"
+  become: true
+  become_user: "{{ kiosk_user }}"
+  changed_when: false
+
 - name: Deploy influx-env secrets file
   template:
     src: influx-env.j2
@@ -30,7 +46,3 @@
     owner: "{{ kiosk_user }}"
     group: "{{ kiosk_user }}"
     state: link
-
-# NOTE: The mqtt-logger Python package and its venv must be installed separately.
-# Clone/install the mqtt-logger project into ~/mqtt-logger and create the .venv.
-# This role only deploys the configuration and systemd service.

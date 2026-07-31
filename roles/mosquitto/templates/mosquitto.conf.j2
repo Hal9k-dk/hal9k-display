@@ -1,0 +1,14 @@
+# Minimal mosquitto.conf (managed by Ansible)
+listener 1883
+allow_anonymous true
+persistence true
+persistence_location /var/lib/mosquitto/
+
+connection mqtt.hal9k.dk
+address mqtt.hal9k.dk:8883
+topic # both 0
+cleansession false
+remote_clientid sofiendal
+remote_username hal9k
+remote_password {{ mosquitto_remote_password }}
+bridge_cafile /etc/ssl/certs/ca-bundle.crt

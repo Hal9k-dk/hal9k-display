@@ -75,6 +75,22 @@
     group: "{{ kiosk_user }}"
     state: link
 
+- name: Deploy refresh script
+  copy:
+    dest: "/home/{{ kiosk_user }}/refresh"
+    owner: "{{ kiosk_user }}"
+    group: "{{ kiosk_user }}"
+    mode: '0755'
+    content: |
+      #!/bin/sh -exu
+      set -o pipefail
+      for workspace in kiosk1 kiosk2 kiosk3 kiosk4; do
+        swaymsg workspace "$workspace"
+        sleep 1
+        ydotool key 63:1 63:0
+        sleep 1
+      done
+
 - name: Reload user systemd daemon
   systemd:
     daemon_reload: true

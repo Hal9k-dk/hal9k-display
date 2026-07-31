@@ -1,0 +1,22 @@
+---
+# Mosquitto: local broker + bridge to mqtt.hal9k.dk
+
+- name: Install mosquitto package
+  pacman:
+    name: mosquitto
+    state: present
+
+- name: Write mosquitto.conf
+  template:
+    src: mosquitto.conf.j2
+    dest: /etc/mosquitto/mosquitto.conf
+    mode: "0640"
+    owner: root
+    group: mosquitto
+  notify: Restart mosquitto
+
+- name: Enable and start mosquitto
+  systemd:
+    name: mosquitto
+    enabled: true
+    state: started

@@ -1,9 +1,15 @@
 ---
 - name: Deploy hal9k display host
   hosts: display
+
+  vars_files:
+    - vars/secrets.yml
+
   roles:
     - base
+    - networking
     - sway
+    - mosquitto
     - kiosk
     - mqtt-logger
     - heartbeat

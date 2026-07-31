@@ -1,5 +1,5 @@
 ---
-- name: Install mosquitto
+- name: Install mosquitto (needed for mosquitto_pub)
   pacman:
     name: mosquitto
     state: present

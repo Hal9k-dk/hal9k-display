@@ -1,0 +1,6 @@
+vars/secrets.yml
+.vaultpass
+*.retry
+__pycache__/
+*.pyc
+.venv/

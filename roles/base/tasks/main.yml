@@ -14,7 +14,6 @@
       - python-bottle
       - python-requests
       - python-packaging
-      - mosquitto
       - ydotool
     state: present
 
@@ -45,6 +44,25 @@
       ExecStart=
       ExecStart=-/sbin/agetty -o '-p -f -- \\u' --noclear --autologin {{ kiosk_user }} %I $TERM
   notify: Reload systemd
+
+- name: Grant hal9k passwordless sudo
+  copy:
+    dest: /etc/sudoers.d/hal9k
+    content: "hal9k ALL=(ALL) ALL\n"
+    mode: "0440"
+    validate: /usr/sbin/visudo -cf %s
+
+- name: Install SSH authorised key for hal9k
+  authorized_key:
+    user: "{{ kiosk_user }}"
+    key: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIH0s8AftU3dbWmmr4CddT3Sx61sINx4Fkq331hKLuRsY"
+    state: present
+
+- name: Install SSH authorised key for root
+  authorized_key:
+    user: root
+    key: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIH0s8AftU3dbWmmr4CddT3Sx61sINx4Fkq331hKLuRsY"
+    state: present
 
 - name: Deploy bash_profile
   copy:
