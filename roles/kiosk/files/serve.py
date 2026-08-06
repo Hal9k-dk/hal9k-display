@@ -97,6 +97,7 @@ def status():
     return f"""
     <!DOCTYPE HTML>
     <head>
+    <meta http-equiv="Refresh" content="600" />
     <style>body {{ background: black; color: #eef; font-family: sans-serif; font-size: larger; }}
     a {{ color: #eef }}
     </style>
@@ -121,6 +122,7 @@ def index():
     return f'''
     <!DOCTYPE HTML>
     <head>
+    <meta http-equiv="Refresh" content="600" />
     <link href=" https://cdn.jsdelivr.net/npm/@picocss/pico@1.5.7/css/pico.min.css " rel="stylesheet">
 
 </head>

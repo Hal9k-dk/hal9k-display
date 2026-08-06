@@ -19,6 +19,7 @@
     owner: "{{ kiosk_user }}"
     group: "{{ kiosk_user }}"
     mode: '0755'
+  notify: Restart kiosk.service
 
 - name: Deploy serve.py
   copy:
@@ -27,6 +28,7 @@
     owner: "{{ kiosk_user }}"
     group: "{{ kiosk_user }}"
     mode: '0644'
+  notify: Restart serve.service
 
 - name: Deploy clock page and font
   copy:
@@ -50,6 +52,9 @@
     - kiosk.service
     - serve.service
     - ydotool.service
+  notify:
+    - Restart kiosk.service
+    - Restart serve.service
 
 - name: Enable kiosk.service for graphical-session.target
   file:
@@ -82,8 +87,17 @@
     group: "{{ kiosk_user }}"
     mode: '0755'
     content: |
-      #!/bin/sh -exu
+      #!/bin/sh -eu
       set -o pipefail
+      # auto-detect sway socket if not in environment
+      if [ -z "${SWAYSOCK:-}" ]; then
+          runtime="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"
+          for s in "$runtime"/sway-ipc.*.sock; do
+              export SWAYSOCK="$s"
+              break
+          done
+      fi
+      [ -n "${WAYLAND_DISPLAY:-}" ] || export WAYLAND_DISPLAY=wayland-1
       for workspace in kiosk1 kiosk2 kiosk3 kiosk4; do
         swaymsg workspace "$workspace"
         sleep 1
