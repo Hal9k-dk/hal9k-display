@@ -42,7 +42,7 @@ def _error_page(title, msg):
 def vejr():
     try:
         svg = requests.get(
-            "https://www.yr.no/nb/innhold/2-2624886/meteogram.svg",
+            "https://www.yr.no/en/content/2-2624886/meteogram.svg?mode=dark",
             timeout=REQUEST_TIMEOUT)
         svg.raise_for_status()
     except Exception as e:
@@ -73,6 +73,10 @@ def vejr():
       display: flex;
       justify-content: center;
       align-items: center;
+      background: #111;
+      }}
+  svg {{
+      background-color: #111 !important;
       }}
 </style>
     </head>
