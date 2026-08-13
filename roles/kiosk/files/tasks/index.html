@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="da">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hvad har du gjort for spacet i dag?</title>
+    <style>
+        :root {
+            --bg: #111;
+            --fg: #eef;
+            --accent: #6cf;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background: var(--bg);
+            color: var(--fg);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+                "Helvetica Neue", Arial, sans-serif;
+            overflow: hidden;
+            user-select: none;
+        }
+
+        header {
+            text-align: center;
+            padding: 4vw 6vw 1vw;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 6vw;
+            font-weight: 700;
+            letter-spacing: 0.02em;
+            line-height: 1.1;
+            color: #fff;
+            text-shadow: 0 0 30px #00f, 0 0 10px #fff;
+        }
+
+        .carousel {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2vw 8vw 4vw;
+            perspective: 800px;
+        }
+
+        .task {
+            max-width: 80vw;
+            text-align: center;
+            font-size: 5vw;
+            font-weight: 500;
+            line-height: 1.3;
+            color: var(--fg);
+            text-shadow: 0 0 18px rgba(108, 204, 255, 0.6);
+        }
+
+        .task.animate {
+            animation: rise 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        @keyframes rise {
+            0% {
+                opacity: 0;
+                transform: translateY(4vh) scale(0.96);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1>Hvad har du gjort for spacet i dag?</h1>
+    </header>
+
+    <main class="carousel">
+        <div class="task" id="task"></div>
+    </main>
+
+    <script>
+        const tasks = [
+            "Tøm opvaskemaskinen.",
+            "Fyld og start opvaskemaskinen.",
+            "Tør køkkenbordet af.",
+            "Tør spisebordet af.",
+            "Tøm en skraldespand.",
+            "Aflever pant på pantstationen.",
+            "Sæt stole på plads.",
+            "Fej gulvet.",
+            "Støvsug gulvet.",
+            "Tør et bord af.",
+            "Tøm en støvsuger.",
+            "Vask klude og viskestykker.",
+            "Læg rene klude på plads.",
+            "Ryd et bord.",
+            "Læg værktøj på plads.",
+            "Læg materialer på plads.",
+            "Rul kabler sammen.",
+            "Fjern affald.",
+            "Flyt ting, der står i vejen.",
+            "Ryd op efter en anden.",
+            "Tøm en spånbeholder.",
+            "Rens et værktøj.",
+            "Ryd et arbejdsbord.",
+            "Sortér skruer.",
+            "Sortér møtrikker.",
+            "Sortér beslag.",
+            "Sortér elektronikdele.",
+            "Læg et stykke værktøj på plads.",
+            "Luk vinduerne.",
+            "Sluk kaffemaskinen.",
+            "Kør på genbrugsplads med affald.",
+            "Klip hækken.",
+            "Støvsug træværkstedet.",
+            "Lav service på udstyret.",
+            "Byg en forbedring til spacet.",
+            "Reparer noget der er gået i stykker.",
+            "Køb og genopfyld forbrugsvarer."
+        ];
+
+        const taskEl = document.getElementById('task');
+
+        // Randomize order, re-shuffling whenever a full round completes.
+        let order = [];
+        let index = 0;
+
+        function shuffle() {
+            order = tasks.map((_, i) => i);
+            for (let i = order.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [order[i], order[j]] = [order[j], order[i]];
+            }
+            index = 0;
+        }
+
+        function showTask() {
+            if (index >= order.length) {
+                shuffle();
+            }
+            const task = tasks[order[index++]];
+            taskEl.textContent = task;
+
+            // Restart the animation.
+            taskEl.classList.remove('animate');
+            void taskEl.offsetWidth; // force reflow
+            taskEl.classList.add('animate');
+        }
+
+        shuffle();
+        showTask();
+        setInterval(showTask, 4000);
+    </script>
+</body>
+
+</html>

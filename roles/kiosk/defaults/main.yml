@@ -6,5 +6,5 @@ kiosk_browser_cmd: "firefox -new-window -kiosk"
 kiosk_urls:
   - "file:///home/{{ kiosk_user }}/clock/index.html"
   - "http://localhost:8080/vejr"
-  - "https://hal9k.dk/"
+  - "file:///home/{{ kiosk_user }}/tasks/index.html"
   - "http://localhost:8080/status"

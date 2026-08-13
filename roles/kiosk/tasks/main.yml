@@ -8,6 +8,7 @@
     mode: '0755'
   loop:
     - "/home/{{ kiosk_user }}/clock"
+    - "/home/{{ kiosk_user }}/tasks"
     - "/home/{{ kiosk_user }}/.config/systemd/user"
     - "/home/{{ kiosk_user }}/.config/systemd/user/default.target.wants"
     - "/home/{{ kiosk_user }}/.config/systemd/user/graphical-session.target.wants"
@@ -40,6 +41,15 @@
   loop:
     - index.html
     - GortonDigitalLight.otf
+
+- name: Deploy tasks carousel page
+  copy:
+    src: tasks/index.html
+    dest: "/home/{{ kiosk_user }}/tasks/index.html"
+    owner: "{{ kiosk_user }}"
+    group: "{{ kiosk_user }}"
+    mode: '0644'
+  notify: Restart kiosk.service
 
 - name: Deploy systemd user units
   template:
