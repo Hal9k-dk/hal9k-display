@@ -33,6 +33,7 @@ def _error_page(title, msg):
     return f"""
     <!DOCTYPE html>
     <html lang="en"><head><meta charset="UTF-8"><title>{title}</title>
+    <meta http-equiv="Refresh" content="60" />
     <style>body{{background:#111;color:#eef;font-family:sans-serif;
     display:flex;align-items:center;justify-content:center;height:100vh;margin:0}}
     </style></head><body><h1>{title}</h1><p>{msg}</p></body></html>
