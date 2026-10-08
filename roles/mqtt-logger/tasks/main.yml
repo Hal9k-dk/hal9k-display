@@ -15,9 +15,9 @@
     group: "{{ kiosk_user }}"
     mode: preserve
 
-- name: Build virtualenv with uv
+- name: Build virtualenv with uv (including InfluxDB support)
   command:
-    cmd: uv sync
+    cmd: uv sync --extra influxdb
     chdir: "/home/{{ kiosk_user }}/mqtt-logger"
   become: true
   become_user: "{{ kiosk_user }}"
